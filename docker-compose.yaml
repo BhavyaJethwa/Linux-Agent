@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./backend
+    container_name: linux-agent-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/secrets/linux-agent-server.pem:/app/secrets/linux-agent-server.pem:ro
+    environment:
+      - PEM_PATH=/app/secrets/linux-agent-server.pem
+    env_file:
+      - ./.env
+    restart: always
+
+  frontend:
+    build: ./frontend
+    container_name: linux-agent-frontend
+    ports:
+      - "8501:8501"  
+    depends_on:
+      - backend
+    restart: always
+    environment: 
+      - BACKEND_URL=http://localhost:8000
+

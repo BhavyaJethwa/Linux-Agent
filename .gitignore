@@ -1,0 +1,7 @@
+.env
+backend/__pycache__/State.cpython-311.pyc
+backend/__pycache__/app.cpython-311.pyc
+backend/__pycache__/graph.cpython-311.pyc
+backend/__pycache__/nodes.cpython-311.pyc
+backend/__pycache__/tool_registry.cpython-311.pyc
+backend/secrets/linux-agent-server.pem
