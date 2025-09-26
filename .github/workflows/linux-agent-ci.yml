@@ -50,7 +50,8 @@ jobs:
         
       - name: Build local Docker images via docker-compose
         run: |
-          docker compose -f docker-compose.yml build
+          docker compose -f docker-compose.yaml build
+
       - name: Tag and Push Images to Docker Hub
         env:
           DOCKER_REPO: ${{ secrets.DOCKERHUB_USERNAME }} 
