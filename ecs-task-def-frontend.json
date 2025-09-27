@@ -11,7 +11,7 @@
         "image": "<IMAGE_FRONTEND>",
         "essential": true,
         "portMappings": [
-          { "containerPort": 3000, "hostPort": 3000, "protocol": "tcp" }
+          { "containerPort": 8501, "hostPort": 8501, "protocol": "tcp" }
         ],
         "logConfiguration": {
           "logDriver": "awslogs",
