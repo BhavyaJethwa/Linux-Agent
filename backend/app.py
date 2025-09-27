@@ -13,6 +13,12 @@ tool_registry = tool_registry
 class QueryRequest(BaseModel):
     query: str
 
+@api.get('/')
+def home():
+    return "Hello ! This is version 1 of the application."
+
+
+
 @api.post("/run-query")
 def run_query(request: QueryRequest):
     """
