@@ -1,0 +1,27 @@
+{
+    "family": "linux-agent-frontend",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "512",
+    "memory": "1024",
+    "executionRoleArn": "arn:aws:iam::201132760938:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+      {
+        "name": "frontend",
+        "image": "<IMAGE_FRONTEND>",
+        "essential": true,
+        "portMappings": [
+          { "containerPort": 3000, "hostPort": 3000, "protocol": "tcp" }
+        ],
+        "logConfiguration": {
+          "logDriver": "awslogs",
+          "options": {
+            "awslogs-group": "/ecs/linux-agent-frontend",
+            "awslogs-region": "ap-south-1",
+            "awslogs-stream-prefix": "ecs"
+          }
+        }
+      }
+    ]
+  }
+  
