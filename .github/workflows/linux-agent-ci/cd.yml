@@ -1,124 +1,124 @@
-# name: Agent-Linux-CI/CD 
+name: Agent-Linux-CI/CD 
 
-# on:
-#   push:
-#     branches: [ "main" ]
+on:
+  push:
+    branches: [ "main" ]
 
-#   pull_request:
-#     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
+jobs:
+  build:
+    runs-on: ubuntu-latest
     
-#     strategy:
-#       matrix:
-#         python-version: ["3.11", "3.12"]
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
         
-#       - name: Set up Python ${{ matrix.python-version }}
-#         uses: actions/setup-python@v5
-#         with:
-#           python-version: ${{ matrix.python-version }}
-#           cache: 'pip'
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
           
-#       - name: Install dependencies
-#         run: |
-#           pip install --upgrade pip
-#           pip install -r requirements.txt
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
           
         
-#   build_docker_images:
-#     runs-on: ubuntu-latest
-#     needs: build 
+  build_docker_images:
+    runs-on: ubuntu-latest
+    needs: build 
 
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
         
-#       - name: Login to DockerHub
-#         uses: docker/login-action@v3
-#         with:
-#             username: ${{ secrets.DOCKERHUB_USERNAME }}
-#             password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v3        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3        
         
-#       - name: Build local Docker images via docker-compose
-#         run: |
-#           docker compose -f docker-compose.yaml build
+      - name: Build local Docker images via docker-compose
+        run: |
+          docker compose -f docker-compose.yaml build
 
-#       - name: Tag and Push Images to Docker Hub
-#         env:
-#           DOCKER_REPO: ${{ secrets.DOCKERHUB_USERNAME }} 
-#           TAG_SHA: ${{ github.sha }}
-#           PROJECT_NAME: linux-agent 
-#         run: |
-#           BACKEND_LOCAL_NAME="${PROJECT_NAME}-backend"
-#           FRONTEND_LOCAL_NAME="${PROJECT_NAME}-frontend"
+      - name: Tag and Push Images to Docker Hub
+        env:
+          DOCKER_REPO: ${{ secrets.DOCKERHUB_USERNAME }} 
+          TAG_SHA: ${{ github.sha }}
+          PROJECT_NAME: linux-agent 
+        run: |
+          BACKEND_LOCAL_NAME="${PROJECT_NAME}-backend"
+          FRONTEND_LOCAL_NAME="${PROJECT_NAME}-frontend"
           
-#           #Tagging and pushing backend
-#           docker tag ${BACKEND_LOCAL_NAME}:latest $DOCKER_REPO/linux-agent-backend:$TAG_SHA
-#           docker tag ${BACKEND_LOCAL_NAME}:latest $DOCKER_REPO/linux-agent-backend:latest
-#           docker push $DOCKER_REPO/linux-agent-backend:$TAG_SHA
-#           docker push $DOCKER_REPO/linux-agent-backend:latest
+          #Tagging and pushing backend
+          docker tag ${BACKEND_LOCAL_NAME}:latest $DOCKER_REPO/linux-agent-backend:$TAG_SHA
+          docker tag ${BACKEND_LOCAL_NAME}:latest $DOCKER_REPO/linux-agent-backend:latest
+          docker push $DOCKER_REPO/linux-agent-backend:$TAG_SHA
+          docker push $DOCKER_REPO/linux-agent-backend:latest
           
-#           # Tagging and Pushing Frontend
-#           docker tag ${FRONTEND_LOCAL_NAME}:latest $DOCKER_REPO/linux-agent-frontend:$TAG_SHA
-#           docker tag ${FRONTEND_LOCAL_NAME}:latest $DOCKER_REPO/linux-agent-frontend:latest
-#           docker push $DOCKER_REPO/linux-agent-frontend:$TAG_SHA
-#           docker push $DOCKER_REPO/linux-agent-frontend:latest
+          # Tagging and Pushing Frontend
+          docker tag ${FRONTEND_LOCAL_NAME}:latest $DOCKER_REPO/linux-agent-frontend:$TAG_SHA
+          docker tag ${FRONTEND_LOCAL_NAME}:latest $DOCKER_REPO/linux-agent-frontend:latest
+          docker push $DOCKER_REPO/linux-agent-frontend:$TAG_SHA
+          docker push $DOCKER_REPO/linux-agent-frontend:latest
 
-#   deploy:
-#     runs-on: ubuntu-latest
-#     needs: build_docker_images
-#     steps:
-#       - name: Checkout Repo
-#         uses: actions/checkout@v4
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build_docker_images
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-#       - name: Configure AWS Credentials
-#         uses: aws-actions/configure-aws-credentials@v4
-#         with:
-#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-#           aws-region: ${{ secrets.AWS_REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
       
-#       - name: Render ECS task definition for backend
-#         id: taskdef-backend
-#         run: |
-#           BACKEND_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/linux-agent-backend:${{ github.sha }}"
-#           sed "s|<IMAGE_BACKEND>|$BACKEND_IMAGE|g" ecs-task-def-backend.json > backend-task-def.json
-#           echo "taskdef-backend=backend-task-def.json" >> $GITHUB_OUTPUT
+      - name: Render ECS task definition for backend
+        id: taskdef-backend
+        run: |
+          BACKEND_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/linux-agent-backend:${{ github.sha }}"
+          sed "s|<IMAGE_BACKEND>|$BACKEND_IMAGE|g" ecs-task-def-backend.json > backend-task-def.json
+          echo "taskdef-backend=backend-task-def.json" >> $GITHUB_OUTPUT
 
-#       # Render Frontend Task Definition
-#       - name: Render ECS task definition for frontend
-#         id: taskdef-frontend
-#         run: |
-#           FRONTEND_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/linux-agent-frontend:${{ github.sha }}"
-#           sed "s|<IMAGE_FRONTEND>|$FRONTEND_IMAGE|g" ecs-task-def-frontend.json > frontend-task-def.json
-#           echo "taskdef-frontend=frontend-task-def.json" >> $GITHUB_OUTPUT
+      # Render Frontend Task Definition
+      - name: Render ECS task definition for frontend
+        id: taskdef-frontend
+        run: |
+          FRONTEND_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/linux-agent-frontend:${{ github.sha }}"
+          sed "s|<IMAGE_FRONTEND>|$FRONTEND_IMAGE|g" ecs-task-def-frontend.json > frontend-task-def.json
+          echo "taskdef-frontend=frontend-task-def.json" >> $GITHUB_OUTPUT
 
-#       # Deploy Backend Service
-#       - name: Deploy Backend Service
-#         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-#         with:
-#           task-definition: ${{ steps.taskdef-backend.outputs.taskdef-backend }}
-#           service: linux-agent-backend-service
-#           cluster: Linux-Agent-cluster
-#           wait-for-service-stability: true
+      # Deploy Backend Service
+      - name: Deploy Backend Service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.taskdef-backend.outputs.taskdef-backend }}
+          service: linux-agent-backend-service
+          cluster: Linux-Agent-cluster
+          wait-for-service-stability: true
 
-#       # Deploy Frontend Service
-#       - name: Deploy Frontend Service
-#         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-#         with:
-#           task-definition: ${{ steps.taskdef-frontend.outputs.taskdef-frontend }}
-#           service: linux-agent-frontend-service
-#           cluster: Linux-Agent-cluster
-#           wait-for-service-stability: true    
+      # Deploy Frontend Service
+      - name: Deploy Frontend Service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.taskdef-frontend.outputs.taskdef-frontend }}
+          service: linux-agent-frontend-service
+          cluster: Linux-Agent-cluster
+          wait-for-service-stability: true    
 
 
           
