@@ -13,6 +13,12 @@
         "portMappings": [
           { "containerPort": 8501, "hostPort": 8501, "protocol": "tcp" }
         ],
+        "environment": [
+            {
+                "name": "BACKEND_URL",
+                "value": "<BACKEND_URL"
+            }
+        ],
         "logConfiguration": {
           "logDriver": "awslogs",
           "options": {
