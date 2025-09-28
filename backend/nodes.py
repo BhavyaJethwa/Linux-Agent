@@ -1,5 +1,6 @@
 import os
 import paramiko
+from io import StringIO
 from langchain_openai import ChatOpenAI
 from State import State
 from dotenv import load_dotenv
@@ -11,8 +12,7 @@ llm = ChatOpenAI(model="gpt-4o-mini")
 # --- EC2 Connection Details ---
 EC2_HOST = "ec2-18-234-82-251.compute-1.amazonaws.com"
 EC2_USER = "ubuntu"
-KEY_FILE = os.getenv("PEM_PATH", "/app/secrets/linux-agent-server.pem")
-tool_registry = tool_registry
+PEM_CONTENT = os.environ["PEM_CONTENT"]
 
 
 def run_tool(tool_name: str) -> str:
@@ -26,8 +26,9 @@ def run_tool(tool_name: str) -> str:
 
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    key = paramiko.RSAKey.from_private_key(StringIO(PEM_CONTENT))
     try:
-        ssh.connect(EC2_HOST, username=EC2_USER, key_filename=KEY_FILE)
+        ssh.connect(EC2_HOST, username=EC2_USER, pkey=key)
         stdin, stdout, stderr = ssh.exec_command(f"bash {remote_script}")
 
         output = stdout.read().decode()
@@ -41,6 +42,8 @@ def run_tool(tool_name: str) -> str:
 
     except Exception as e:
         return f"SSH connection error: {str(e)}"
+    finally:
+        ssh.close()
     
     
 def router_node(state: State):

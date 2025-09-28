@@ -5,6 +5,7 @@
     "cpu": "512",
     "memory": "1024",
     "executionRoleArn": "arn:aws:iam::201132760938:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::201132760938:role/ecsTaskExecutionRole",
     "containerDefinitions": [
       {
         "name": "backend",
@@ -15,6 +16,13 @@
         ],
         "environment": [
             { "name": "OPENAI_API_KEY", "value": "<OPENAI_API_KEY>"}
+        ],
+        "secrets": [
+            {
+                "name": "PEM_CONTENT",
+                "valueFrom": "arn:aws:secretsmanager:us-east-1:201132760938:secret:linux-agent-server-pem"
+            }
+
         ],
         "logConfiguration": {
           "logDriver": "awslogs",
