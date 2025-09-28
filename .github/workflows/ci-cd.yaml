@@ -90,7 +90,7 @@ jobs:
       - name: Render ECS task definition for backend
         id: taskdef-backend
         run: |
-            BACKEND_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/linux-agent-backend:latest"
+            BACKEND_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/linux-agent-backend:${{ github.sha}}"
             sed "s|<IMAGE_BACKEND>|$BACKEND_IMAGE|g; s|<OPENAI_API_KEY>|${{ secrets.OPENAI_API_KEY }}|g" ecs-task-def-backend.json > backend-task-def.json
             echo "taskdef-backend=backend-task-def.json" >> $GITHUB_OUTPUT
 
