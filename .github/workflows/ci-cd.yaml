@@ -99,7 +99,8 @@ jobs:
         id: taskdef-frontend
         run: |
           FRONTEND_IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/linux-agent-frontend:${{ github.sha }}"
-          sed "s|<IMAGE_FRONTEND>|$FRONTEND_IMAGE|g" ecs-task-def-frontend.json > frontend-task-def.json
+          ALB_DNS="linux-agent-backend-alb-1048459327.us-east-1.elb.amazonaws.com"
+          sed "s|<IMAGE_FRONTEND>|$FRONTEND_IMAGE|g; s|<BACKEND_URL>|http://$ALB_DNS|g" ecs-task-def-frontend.json > frontend-task-def.json
           echo "taskdef-frontend=frontend-task-def.json" >> $GITHUB_OUTPUT
 
       # Deploy Backend Service
